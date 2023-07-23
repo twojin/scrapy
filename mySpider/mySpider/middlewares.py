@@ -5,6 +5,10 @@
 
 from scrapy import signals
 from fake_useragent import UserAgent
+from selenium import webdriver
+
+from scrapy.http import HtmlResponse
+import time
 
 # useful for handling different item types with a single interface
 from itemadapter import is_item, ItemAdapter
@@ -79,7 +83,6 @@ class MyspiderDownloaderMiddleware:
         # - or return a Request object
         # - or raise IgnoreRequest: process_exception() methods of
         #   installed downloader middleware will be called
-        request.headers['User-Agent'] = UserAgent.random
         return None
 
     def process_response(self, request, response, spider):
@@ -103,3 +106,104 @@ class MyspiderDownloaderMiddleware:
 
     def spider_opened(self, spider):
         spider.logger.info("Spider opened: %s" % spider.name)
+class RandomUserAgentDownloaderMiddleware:
+    # Not all methods need to be defined. If a method is not defined,
+    # scrapy acts as if the downloader middleware does not modify the
+    # passed objects.
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        # This method is used by Scrapy to create your spiders.
+        s = cls()
+        crawler.signals.connect(s.spider_opened, signal=signals.spider_opened)
+        return s
+
+    def process_request(self, request, spider):
+        # Called for each request that goes through the downloader
+        # middleware.
+
+        # Must either:
+        # - return None: continue processing this request
+        # - or return a Response object
+        # - or return a Request object
+        # - or raise IgnoreRequest: process_exception() methods of
+        #   installed downloader middleware will be called
+        request.headers['User-Agent'] = UserAgent().random
+        return None
+
+    def process_response(self, request, response, spider):
+        # Called with the response returned from the downloader.
+
+        # Must either;
+        # - return a Response object
+        # - return a Request object
+        # - or raise IgnoreRequest
+        return response
+
+    def process_exception(self, request, exception, spider):
+        # Called when a download handler or a process_request()
+        # (from other downloader middleware) raises an exception.
+
+        # Must either:
+        # - return None: continue processing this exception
+        # - return a Response object: stops process_exception() chain
+        # - return a Request object: stops process_exception() chain
+        pass
+
+    def spider_opened(self, spider):
+        spider.logger.info("Spider opened: %s" % spider.name)
+
+class BrowserLessDownloaderMiddleware:
+    # Not all methods need to be defined. If a method is not defined,
+    # scrapy acts as if the downloader middleware does not modify the
+    # passed objects.
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        # This method is used by Scrapy to create your spiders.
+        s = cls()
+        crawler.signals.connect(s.spider_opened, signal=signals.spider_opened)
+        return s
+
+
+
+    def process_request(self, request, spider):
+
+        # 获取网页链接内容
+        spider.logger.info(f"Chrome driver get: {request.url}")
+        self.driver.get(request.url)
+        # self.driver.execute_script("scroll(0, 1000);")
+        # time.sleep(1)
+        # 返回HTML数据
+        return HtmlResponse(url=request.url,
+                            body=self.convert_resp_body(request, spider),
+                            request=request,
+                            encoding='utf-8',
+                            status=200)
+
+
+    def process_response(self, request, response, spider):
+        # Called with the response returned from the downloader.
+
+        # Must either;
+        # - return a Response object
+        # - return a Request object
+        # - or raise IgnoreRequest
+        return response
+
+    def process_exception(self, request, exception, spider):
+        # Called when a download handler or a process_request()
+        # (from other downloader middleware) raises an exception.
+
+        # Must either:
+        # - return None: continue processing this exception
+        # - return a Response object: stops process_exception() chain
+        # - return a Request object: stops process_exception() chain
+        pass
+
+    def spider_opened(self, spider):
+        spider.logger.info("Spider opened: %s" % spider.name)
+        option = webdriver.ChromeOptions()
+        # option.add_argument('--headless')
+        self.driver = webdriver.Chrome(executable_path="D:/ruanjian/chromedriver-win64/chromedriver.exe",
+                                       chrome_options=option)
