@@ -12,6 +12,7 @@ class DoubanScrapy(scrapy.Spider):
 
     # parse方法作为回调函数(callback)赋值给了Request。request的响应（response）会赋值给该方法
     def parse(self, response):
-        bookList = response.xpath("//div[@class='section-works']//li[1]").extract()
+        bookList = response.xpath('//*[@id="react-root"]/div/section[2]/div/ul/li').extract()
         for book in bookList:
             print(book)
+

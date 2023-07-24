@@ -8,6 +8,7 @@ from fake_useragent import UserAgent
 from selenium import webdriver
 
 from scrapy.http import HtmlResponse
+from selenium.webdriver.chrome.service import Service
 import time
 
 # useful for handling different item types with a single interface
@@ -158,12 +159,19 @@ class BrowserLessDownloaderMiddleware:
     # scrapy acts as if the downloader middleware does not modify the
     # passed objects.
 
+    def __init__(self):
+        # 定义成员变量
+        self.driver = None
+
     @classmethod
     def from_crawler(cls, crawler):
         # This method is used by Scrapy to create your spiders.
-        s = cls()
-        crawler.signals.connect(s.spider_opened, signal=signals.spider_opened)
-        return s
+        browserLessDownloaderMiddleware = cls()
+        # spider开始时执行browserLessDownloaderMiddleware.spider_opened方法
+        crawler.signals.connect(browserLessDownloaderMiddleware.spider_opened, signal=signals.spider_opened)
+        # spider结束时执行browserLessDownloaderMiddleware.spider_closed
+        crawler.signals.connect(browserLessDownloaderMiddleware.spider_closed, signal=signals.spider_closed)
+        return browserLessDownloaderMiddleware
 
 
 
@@ -172,15 +180,9 @@ class BrowserLessDownloaderMiddleware:
         # 获取网页链接内容
         spider.logger.info(f"Chrome driver get: {request.url}")
         self.driver.get(request.url)
-        # self.driver.execute_script("scroll(0, 1000);")
-        # time.sleep(1)
-        # 返回HTML数据
-        return HtmlResponse(url=request.url,
-                            body=self.convert_resp_body(request, spider),
-                            request=request,
-                            encoding='utf-8',
-                            status=200)
-
+        content = self.driver.page_source
+        self.driver.implicitly_wait(5)
+        return HtmlResponse(request.url, encoding="utf-8", body=content, request=request)
 
     def process_response(self, request, response, spider):
         # Called with the response returned from the downloader.
@@ -203,7 +205,12 @@ class BrowserLessDownloaderMiddleware:
 
     def spider_opened(self, spider):
         spider.logger.info("Spider opened: %s" % spider.name)
-        option = webdriver.ChromeOptions()
-        # option.add_argument('--headless')
-        self.driver = webdriver.Chrome(executable_path="D:/ruanjian/chromedriver-win64/chromedriver.exe",
-                                       chrome_options=option)
+        options = webdriver.ChromeOptions()
+        # options.add_argument('--headless')
+        service = Service(executable_path='D:/software/chromedriver-win64/chromedriver.exe')
+        self.driver = webdriver.Chrome(service=service, options=options)
+
+    def spider_closed(self, spider):
+        spider.logger.info("Spider closed: %s" % spider.name)
+        self.driver.close()
+
