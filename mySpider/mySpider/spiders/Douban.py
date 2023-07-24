@@ -1,5 +1,5 @@
 import scrapy
-
+from ..items import DoubanBookItem
 
 class DoubanScrapy(scrapy.Spider):
     # 爬虫名 必须唯一
@@ -12,7 +12,32 @@ class DoubanScrapy(scrapy.Spider):
 
     # parse方法作为回调函数(callback)赋值给了Request。request的响应（response）会赋值给该方法
     def parse(self, response):
-        bookList = response.xpath('//*[@id="react-root"]/div/section[2]/div/ul/li').extract()
+        bookList = response.xpath('//div[@class="section-works"]/ul/li[@class="works-item "]')
         for book in bookList:
-            print(book)
+
+            # 题目
+            item = DoubanBookItem()
+            item['title'] = book.xpath(".//span[@class='title-text']/span/text()").extract_first()
+
+            # 作者和翻译员
+            authorList = book.xpath(".//div[@class='author']/a")
+            if len(authorList) > 1:
+                item['author'] = authorList[0].xpath("./span/span/text()").extract_first()
+                item['introduction'] = authorList[1].xpath("./span/span/text()").extract_first()
+
+            else:
+                item['author'] = authorList[0].xpath("./span/span/text()").extract_first()
+
+            print(item)
+
+
+
+
+
+
+
+
+
+
+
 
