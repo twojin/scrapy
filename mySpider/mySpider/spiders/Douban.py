@@ -28,6 +28,24 @@ class DoubanScrapy(scrapy.Spider):
             else:
                 item['author'] = authorList[0].xpath("./span/span/text()").extract_first()
 
+            # 简介
+            item['introduction'] = book.xpath(".//a[@class='intro']/span/span/text()").extract_first()
+
+            # 分类
+            item['kind'] = book.xpath(".//a[@class='kind-link']/text()").extract()
+
+            #字数
+            item['wordCount'] = book.xpath(".//div[@class='sticky-info']/span[3]/text()").extract_first()
+
+            # 价格
+            price = book.xpath(".//span[@class='price-tag']")
+            orgPrice = price.xpath("./s/text()").extract_first()
+            if orgPrice is None:
+                item['originalPrice'] = price.xpath("./text()").extract_first()
+            else:
+                item['originalPrice'] = orgPrice
+                item['discountPrice'] = price.xpath("./span[2]/text()").extract_first()
+
             print(item)
 
 
