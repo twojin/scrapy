@@ -206,9 +206,12 @@ class BrowserLessDownloaderMiddleware:
     def spider_opened(self, spider):
         spider.logger.info("Spider opened: %s" % spider.name)
         options = webdriver.ChromeOptions()
+        options.add_experimental_option('excludeSwitches', ['enable-automation'])
+        options.add_argument("--disable-blink-features")
+        options.add_argument("--disable-blink-features=AutomationControlled")
+        # options.add_argument("user-agent=" + UserAgent().random)
         # options.add_argument('--headless')
-        service = Service(executable_path='D:/software/chromedriver-win64/chromedriver.exe')
-        self.driver = webdriver.Chrome(service=service, options=options)
+        self.driver = webdriver.Chrome(options=options)
 
     def spider_closed(self, spider):
         spider.logger.info("Spider closed: %s" % spider.name)
