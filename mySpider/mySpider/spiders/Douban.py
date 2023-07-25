@@ -14,11 +14,13 @@ class DoubanScrapy(scrapy.Spider):
     def parse(self, response):
         bookList = response.xpath('//div[@class="section-works"]/ul/li[@class="works-item "]')
         for book in bookList:
-           print(self.extractItem(book))
+            yield self.extractItem(book)
 
         for i in range(2, 51):
             url = "https://read.douban.com/category/100?sort=hot&page=" + str(i)
             yield scrapy.Request(url, callback=self.parse)
+
+
 
     def extractItem(self, book):
 
@@ -30,7 +32,7 @@ class DoubanScrapy(scrapy.Spider):
         authorList = book.xpath(".//div[@class='author']/a")
         if len(authorList) > 1:
             item['author'] = authorList[0].xpath("./span/span/text()").extract_first()
-            item['introduction'] = authorList[1].xpath("./span/span/text()").extract_first()
+            item['translator'] = authorList[1].xpath("./span/span/text()").extract_first()
 
         else:
             item['author'] = authorList[0].xpath("./span/span/text()").extract_first()
@@ -39,7 +41,7 @@ class DoubanScrapy(scrapy.Spider):
         item['introduction'] = book.xpath(".//a[@class='intro']/span/span/text()").extract_first()
 
         # 分类
-        item['kind'] = book.xpath(".//a[@class='kind-link']/text()").extract()
+        item['kind'] = ",".join(book.xpath(".//a[@class='kind-link']/text()").extract())
 
         # 字数
         item['wordCount'] = book.xpath(".//div[@class='sticky-info']/span[3]/text()").extract_first()

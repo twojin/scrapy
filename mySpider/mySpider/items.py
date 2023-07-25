@@ -14,6 +14,7 @@ from scrapy.item import Item, Field
 
 class DoubanBookItem(Item):
 
+    table = "douban_book"
     title = Field()
     author = Field()
     translator = Field()

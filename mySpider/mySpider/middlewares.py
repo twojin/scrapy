@@ -180,7 +180,7 @@ class BrowserLessDownloaderMiddleware:
         # 获取网页链接内容
         spider.logger.info(f"Chrome driver get: {request.url}")
         self.driver.get(request.url)
-        time.sleep(5)
+        time.sleep(3)
         content = self.driver.page_source
 
         return HtmlResponse(request.url, encoding="utf-8", body=content, request=request)

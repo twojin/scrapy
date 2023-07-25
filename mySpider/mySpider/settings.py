@@ -12,6 +12,13 @@ BOT_NAME = "mySpider"
 SPIDER_MODULES = ["mySpider.spiders"]
 NEWSPIDER_MODULE = "mySpider.spiders"
 
+#数据库
+MYSQL_HOST = "localhost"
+MYSQL_DATABASE = "scrapy"
+MYSQL_PORT = 3306
+MYSQL_USER = "root"
+MYSQL_PASSWORD = "136011760"
+
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = "mySpider (+http://www.yourdomain.com)"
@@ -62,9 +69,9 @@ DOWNLOADER_MIDDLEWARES = {
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    "mySpider.pipelines.MyspiderPipeline": 300,
-#}
+ITEM_PIPELINES = {
+   "mySpider.pipelines.MysqlPipeline": 300,
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
