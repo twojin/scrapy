@@ -1,4 +1,4 @@
 import os
 SCRAPY_START = "scrapy crawl "
-name = "douban"
+name = "bilibili"
 os.system(SCRAPY_START + name)
