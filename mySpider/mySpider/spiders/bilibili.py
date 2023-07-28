@@ -1,12 +1,16 @@
+import json
+
 import scrapy
 from functools import reduce
 from hashlib import md5
 import urllib.parse
 import time
+from ..items import BilibiliUserItem
 class BilibiliScrapy(scrapy.Spider):
     img_key = None
     sub_key = None
     url = "https://api.bilibili.com/x/space/wbi/acc/info"
+    url2 = "https://api.bilibili.com/x/relation/stat"
     referer_url = "https://space.bilibili.com/%s?spm_id_from=333.1007.tianma.1-2-2.click"
 
     mixinKeyEncTab = [
@@ -30,11 +34,86 @@ class BilibiliScrapy(scrapy.Spider):
         else:
             self.getWbiKeys(response)
 
-        for mid in range(482228371, 482228373):
-            yield scrapy.FormRequest(url=self.url, formdata=self.getParams(mid), method="get", headers=self.getHeaders(mid), callback=self.my_parse, dont_filter = True )
+        for mid in range(470962000, 470962002):
+            add_params = {
+                "mid": str(mid)
+            }
+            yield scrapy.FormRequest(url=self.url, formdata=self.getParams(mid), method="get", headers=self.getHeaders(mid), callback=self.my_parse, dont_filter = True, cb_kwargs=add_params)
 
-    def my_parse(self, response):
-        print(response.text)
+    def my_parse(self, response, mid):
+
+        if ( response.status == 200 ):
+            request = response.request
+            userInfo = response.json()
+            data = userInfo['data']
+            if userInfo['code'] == -404:
+                print(str(mid) + "无效")
+                print("-----------------------------------")
+            elif userInfo['code'] == -403:
+                print("访问权限不足！！！")
+                print(request)
+                print("-----------------------------------")
+            elif userInfo['code'] == -400:
+                print("请求错误！！！")
+                print(request)
+                print("-----------------------------------")
+            else:
+                item = BilibiliUserItem()
+                item[item.name2] = data['name']
+                item[item.mid2] = data['mid']
+                item[item.sex2] = data['sex']
+                item[item.sign2] = data['sign']
+                item[item.rank2] = data['rank']
+                item[item.level2] = data['level']
+                item[item.silence2] = data['silence']
+                item[item.official_role2] = data['official']['role']
+                item[item.official_type2] = data['official']['type']
+                item[item.vip_type2] = data['vip']['type']
+                item[item.vip_status2] = data['vip']['status']
+                item[item.vip_due_date2] = data['vip']['due_date']
+                item[item.vip_label_text2] = data['vip']['label']['text']
+                item[item.vip_label_label_theme2] = data['vip']['label']['label_theme']
+                item[item.vip_role2] = data['vip']['role']
+                item[item.vip_tv_vip_status2] = data['vip']['tv_vip_status']
+                item[item.birthday2] = data['birthday']
+                if data['school'] != None:
+                    item[item.school_name2] = data['school']['name']
+                else:
+                    data['school'] = ''
+                item[item.is_senior_member2] = data['is_senior_member']
+                item[item.elec_show_info_show2] = data['elec']['show_info']['show']
+                item[item.elec_show_info_state2] = data['elec']['show_info']['state']
+
+                add_params = {
+                    "item": item
+                }
+                yield scrapy.FormRequest(url=self.url2, formdata=self.getParams2(mid), method="get",
+                                         headers=self.getHeaders2(), callback=self.my_parse2, dont_filter=True,
+                                         cb_kwargs=add_params)
+        else:
+            print("状态码异常！！请求接口失败")
+            print(response.request)
+            print("-----------------------------------")
+
+
+    def my_parse2(self, response, item:BilibiliUserItem):
+        request = response.request
+        if ( response.status == 200 ):
+            userInfo = response.json()
+            data = userInfo['data']
+            if userInfo['code'] != 0:
+                print("请求错误！！！")
+                print(request)
+                print("-----------------------------------")
+            else:
+                item[item.follower2] = data['follower']
+                item[item.following2] = data['following']
+                print(item)
+        else:
+            print("状态码异常！！请求接口失败")
+            print(request)
+            print("-----------------------------------")
+
 
     def getWbiKeys(self, response):
         json_content = response.json()
@@ -58,6 +137,12 @@ class BilibiliScrapy(scrapy.Spider):
         }
 
         return params
+
+    def getParams2(self, mid):
+        params = {
+            "vmid": str(mid)
+        }
+        return params
     def getHeaders(self, mid):
         headers = {
             "Accept":"application/json, text/plain, */*",
@@ -71,6 +156,14 @@ class BilibiliScrapy(scrapy.Spider):
             "Sec-Fetch-Mode":"cors",
             "Sec-Fetch-Site":"same-site",
             "Connection":"keep-alive"
+        }
+        return headers
+
+    def getHeaders2(self):
+        headers = {
+            "Accept": "application/json, text/plain, */*",
+            "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
+            "Connection": "keep-alive"
         }
         return headers
 
