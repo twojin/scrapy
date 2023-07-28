@@ -1,0 +1,71 @@
+mid	num	mid
+name	str	昵称
+sex	str	性别	男/女/保密
+sign	str	签名
+rank	num	用户权限等级	目前应该无任何作用
+		5000：0级未答题
+		10000：普通会员
+		20000：字幕君
+		25000：VIP
+		30000：真·职人
+		32000：管理员
+level	num	当前等级	0-6 级
+silence	num	封禁状态	0：正常 1：被封
+
+official
+role	num	认证类型	见 用户认证类型一览
+type	num	是否认证	-1：无
+                                0：个人认证
+		1：机构认证
+
+vip
+type	num	会员类型
+status	num	会员状态
+due_date	num	会员过期时间	毫秒时间戳
+	label
+	text	str	会员类型文案
+	label_theme	str	会员标签
+role	num	大角色类型
+tv_vip_status	num	电视大会员状态
+
+
+birthday	str	生日
+
+school
+name 学校名
+
+is_senior_member	num	是否为硬核会员
+
+elec
+	show_info
+	show	bool	是否开通了充电
+	state	num	状态	-1：未开通
+				1：已开通
+
+CREATE table bilibili_user(
+		 id BIGINT AUTO_INCREMENT,
+		`mid` VARCHAR(255),
+    `name` VARCHAR(255),
+    sex VARCHAR(255),
+    sign VARCHAR(255),
+    rank VARCHAR(255),
+    `level` VARCHAR(255),
+    silence VARCHAR(255),
+    official_role VARCHAR(255),
+    official_type VARCHAR(255),
+    vip_type VARCHAR(255),
+    vip_status VARCHAR(255),
+    vip_due_date VARCHAR(255),
+    vip_label_text VARCHAR(255),
+    vip_label_label_theme VARCHAR(255),
+    vip_role VARCHAR(255),
+    vip_tv_vip_status VARCHAR(255),
+    birthday VARCHAR(255),
+    school_name VARCHAR(255),
+    is_senior_member VARCHAR(255),
+    elec_show_info_show VARCHAR(255),
+    elec_show_info_state VARCHAR(255),
+    following VARCHAR(255),
+    follower VARCHAR(255),
+		PRIMARY KEY (`id`)
+)
