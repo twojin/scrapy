@@ -27,11 +27,11 @@ class DoubanBookItem(Item):
 class BilibiliUserItem(Item):
     table = "bilibili_user"
     mid2 = "mid"
-    name2 = "name"
+    name2 = "u_name"
     sex2 = "sex"
     sign2 = "sign"
-    rank2 = "rank"
-    level2 = "level"
+    rank2 = "u_rank"
+    level2 = "u_level"
     silence2 = "silence"
     official_role2 = "official_role"
     official_type2 = "official_type"
@@ -51,11 +51,11 @@ class BilibiliUserItem(Item):
     follower2 = "follower"
 
     mid = Field()
-    name = Field()
+    u_name = Field()
     sex = Field()
     sign = Field()
-    rank = Field()
-    level = Field()
+    u_rank = Field()
+    u_level = Field()
     silence = Field()
     official_role = Field()
     official_type = Field()

@@ -34,7 +34,7 @@ class BilibiliScrapy(scrapy.Spider):
         else:
             self.getWbiKeys(response)
 
-        for mid in range(470962000, 470962002):
+        for mid in range(35368644, 35369645):
             add_params = {
                 "mid": str(mid)
             }
@@ -108,7 +108,7 @@ class BilibiliScrapy(scrapy.Spider):
             else:
                 item[item.follower2] = data['follower']
                 item[item.following2] = data['following']
-                print(item)
+                yield item
         else:
             print("状态码异常！！请求接口失败")
             print(request)
