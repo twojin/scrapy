@@ -70,7 +70,7 @@ DOWNLOADER_MIDDLEWARES = {
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-   "mySpider.pipelines.MysqlPipeline": 300,
+   "mySpider.pipelines.MysqlTwistedPipeline": 300,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
@@ -101,9 +101,6 @@ FEED_EXPORT_ENCODING = "utf-8"
 
 DOWNLOAD_DELAY = 0.5
 RANDOMIZE_DOWNLOAD_DELAY = True
-# DOWNLOAD_TIMEOUT = 10
-# LOG_LEVEL = "DEBUG"  # 输出级别
-# LOG_STDOUT = True  # 是否标准输出
-RETRY_ENABLED = False
-COOKIES_ENABLED = False
-CONCURRENT_REQUESTS = 80
+# RETRY_ENABLED = False
+# COOKIES_ENABLED = False
+# CONCURRENT_REQUESTS = 80

@@ -9,6 +9,9 @@ from itemadapter import ItemAdapter
 
 import pymysql
 
+from twisted.enterprise import adbapi
+
+
 class MyspiderPipeline:
     def process_item(self, item, spider):
         return item
@@ -53,3 +56,51 @@ class MysqlPipeline:
     # 关闭爬虫时断开MongoDB数据库连接
     def close_spider(self, spider):
         self.db.close()
+
+
+class MysqlTwistedPipeline:
+    def __init__(self, params: dict):
+        self.db_connect_pool = None
+        self.params = params
+
+    @classmethod
+    # 获取settings配置文件当中设置的MySQL各个参数
+    def from_crawler(cls, crawler):
+        params = dict(
+            host=crawler.settings.get("MYSQL_HOST"),
+            database=crawler.settings.get("MYSQL_DATABASE"),
+            port=crawler.settings.get("MYSQL_PORT"),
+            user=crawler.settings.get("MYSQL_USER"),
+            password=crawler.settings.get("MYSQL_PASSWORD"),
+            charset="utf8",
+            cursorclass=pymysql.cursors.DictCursor
+        )
+
+        s = cls(
+            params
+        )
+        # open_spider、process_item、close_spider为默认方法无需手动设置信号量
+        return s;
+
+    # 开启爬虫时连接MongoDB数据库
+    def open_spider(self, spider):
+        self.db_connect_pool = adbapi.ConnectionPool('pymysql', **self.params)
+
+    def process_item(self, item, spider):
+        result = self.db_connect_pool.runInteraction(self.insert, item)
+        # 给result绑定一个回调函数，用于监听错误信息
+        result.addErrback(self.error)
+
+    def insert(self, cursor, item):
+        data = dict(item)
+        keys = ",".join(data.keys())  # 字段名
+        values = ",".join(["%s"] * len(data))  # 值
+        sql = "insert into %s (%s) values(%s)" % (item.table, keys, values)
+        cursor.execute(sql, tuple(data.values()))
+
+    def error(self, reason):
+        print('--------', reason)
+
+    # 关闭爬虫时断开MongoDB数据库连接
+    def close_spider(self, spider):
+        self.db_connect_pool.close()
